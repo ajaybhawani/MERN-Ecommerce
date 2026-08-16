@@ -16,7 +16,7 @@ const Signup = () => {
     password: "",
   });
 
-  const [serverError, setServerError] = useState("");
+  const [serverMsg, setServerMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -65,11 +65,11 @@ const Signup = () => {
 
     try {
       const response = await api.post("auth/signup", formData);
-      setServerError(response?.data?.message);
+      setServerMsg(response?.data?.message);
 
       setFormData;
     } catch (error) {
-      setServerError(error?.response?.data?.message || "An error occurred");
+      setServerMsg(error?.response?.data?.message || "An error occurred");
     }
   };
 
@@ -83,9 +83,9 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {serverError && (
+          {serverMsg && (
             <div className="rounded-lg border text-center border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-blue-600">
-              {serverError}
+              {serverMsg}
             </div>
           )}
 
