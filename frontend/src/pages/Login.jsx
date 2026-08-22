@@ -3,9 +3,12 @@ import { Link, useNavigate } from "react-router";
 import api from "../api/axios";
 import { validateEmail } from "../utils/validation";
 import { Eye, EyeOff } from "lucide-react";
+import { useToast } from "../components/toastContext";
+import Button from "../components/Button";
 
 const Login = () => {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -17,7 +20,6 @@ const Login = () => {
     password: "",
   });
 
-  const [serverMsg, setServerMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,14 +35,11 @@ const Login = () => {
       ...prev,
       [name]: "",
     }));
-
-    setServerMsg("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
-    setServerMsg("");
     const emailError = validateEmail(formData.email);
 
     if (emailError) {
@@ -67,15 +66,13 @@ const Login = () => {
       };
 
       localStorage.setItem("userData", JSON.stringify(userData));
-      setServerMsg(response?.data?.message);
+      toast.success(response?.data?.message || "Logged in successfully");
 
       setTimeout(() => {
         navigate("/");
       }, 1000);
     } catch (error) {
-      setServerMsg(
-        error.response?.data?.message || "Invalid email or password",
-      );
+      toast.error(error.response?.data?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -89,12 +86,6 @@ const Login = () => {
 
           <p className="text-gray-500 mt-2">Login to your account</p>
         </div>
-
-        {serverMsg && (
-          <div className="text-center mb-5 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
-            {serverMsg}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -156,14 +147,15 @@ const Login = () => {
                 }`}
               />
 
-              <button
-                type="button"
+              <Button
+                variant="plain"
+                size="none"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+              </Button>
             </div>
 
             {error.password && (
@@ -171,13 +163,15 @@ const Login = () => {
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+            radius="lg"
+            fullWidth
+            loading={loading}
+            loadingText="Logging in..."
           >
-            {loading ? "Logging in..." : "Login"}
-          </button>
+            Login
+          </Button>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-600">

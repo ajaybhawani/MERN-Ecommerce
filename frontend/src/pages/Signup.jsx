@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import api from "../api/axios";
 import { Eye, EyeOff } from "lucide-react";
 import { validateEmail, validatePassword } from "../utils/validation";
+import { useToast } from "../components/toastContext";
+import Button from "../components/Button";
 
 const Signup = () => {
+  const toast = useToast();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,7 +20,7 @@ const Signup = () => {
     password: "",
   });
 
-  const [serverMsg, setServerMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -64,12 +68,21 @@ const Signup = () => {
     }
 
     try {
-      const response = await api.post("auth/signup", formData);
-      setServerMsg(response?.data?.message);
+      setLoading(true);
 
-      setFormData;
+      const response = await api.post("auth/signup", formData);
+
+      toast.success(response?.data?.message || "Account created successfully");
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+      });
     } catch (error) {
-      setServerMsg(error?.response?.data?.message || "An error occurred");
+      toast.error(error?.response?.data?.message || "An error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,12 +96,6 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {serverMsg && (
-            <div className="rounded-lg border text-center border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-blue-600">
-              {serverMsg}
-            </div>
-          )}
-
           <div>
             <label
               htmlFor="name"
@@ -166,14 +173,15 @@ const Signup = () => {
                 }`}
               />
 
-              <button
-                type="button"
+              <Button
+                variant="plain"
+                size="none"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+              </Button>
             </div>
 
             {errors.password && (
@@ -181,12 +189,15 @@ const Signup = () => {
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+            radius="lg"
+            fullWidth
+            loading={loading}
+            loadingText="Creating account..."
           >
             Sign Up
-          </button>
+          </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
