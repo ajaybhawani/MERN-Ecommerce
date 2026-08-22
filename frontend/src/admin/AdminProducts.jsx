@@ -2,7 +2,6 @@ import {
   AlertCircle,
   ArrowLeft,
   Boxes,
-  ImageOff,
   Loader2,
   PackagePlus,
   Pencil,
@@ -15,51 +14,10 @@ import { Link } from "react-router";
 import api from "../api/axios";
 import Button from "../components/Button";
 import ConfirmModal from "../components/ConfirmModal";
+import ProductImage from "../components/ProductImage";
 import { useToast } from "../components/toastContext";
+import { formatPrice, stockBadge } from "../utils/format";
 import ProductFormModal from "./ProductFormModal";
-
-const currency = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
-
-const stockBadge = (stock) => {
-  if (Number(stock) <= 0) {
-    return { label: "Out of stock", className: "bg-red-50 text-red-600" };
-  }
-
-  if (Number(stock) <= 5) {
-    return { label: `${stock} left`, className: "bg-amber-50 text-amber-700" };
-  }
-
-  return { label: `${stock} in stock`, className: "bg-green-50 text-green-700" };
-};
-
-const ProductThumbnail = ({ src, alt }) => {
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    setFailed(false);
-  }, [src]);
-
-  if (!src || failed) {
-    return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-400">
-        <ImageOff className="h-5 w-5" />
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt={alt}
-      onError={() => setFailed(true)}
-      className="h-14 w-14 shrink-0 rounded-lg border border-gray-200 bg-white object-contain p-1"
-    />
-  );
-};
 
 const AdminProducts = () => {
   const toast = useToast();
@@ -348,9 +306,11 @@ const AdminProducts = () => {
                         >
                           <td className="px-4 py-4 sm:px-6">
                             <div className="flex items-center gap-4">
-                              <ProductThumbnail
+                              <ProductImage
                                 src={product.image}
                                 alt={product.title}
+                                className="h-14 w-14 shrink-0 rounded-lg border border-gray-200 bg-white object-contain p-1"
+                                fallbackClassName="h-14 w-14 shrink-0 rounded-lg border border-gray-200"
                               />
 
                               <div className="min-w-0 max-w-[18rem]">
@@ -372,7 +332,7 @@ const AdminProducts = () => {
                           </td>
 
                           <td className="whitespace-nowrap px-4 py-4 font-semibold text-slate-900 sm:px-6">
-                            {currency.format(Number(product.price) || 0)}
+                            {formatPrice(product.price)}
                           </td>
 
                           <td className="px-4 py-4 sm:px-6">
