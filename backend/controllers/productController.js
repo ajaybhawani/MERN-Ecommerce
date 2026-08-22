@@ -16,7 +16,17 @@ export const createProduct = async (req, res) => {
 // get all product
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const { search, category } = req.query;
+    let filter = {};
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+
+    if (category) {
+      filter.category = category;
+    }
+
+    const products = await Product.find(filter).sort({ createdAt: -1 });
     res.json(products);
   } catch (error) {
     return res.status(500).json({ message: "Server Error:", error });
